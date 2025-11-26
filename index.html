@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>GTM Training Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Тренувальний сайт для роботи з Google Tag Manager: покупки, реєстрація, тріал."
+  />
+  <!-- СЮДИ ПОТІМ ВСТАВИШ GTM <script> В HEAD -->
+  <link rel="stylesheet" href="src/css/style.css" />
+</head>
+<body>
+  <!-- СЮДИ ПОТІМ ВСТАВИШ GTM NOSCRIPT -->
+
+  <div class="page">
+    <header>
+      <div>
+        <h1>GTM Training Shop</h1>
+        <p>Спрощений демо-магазин для тренування аналітики: покупки, реєстрація, тріал.</p>
+      </div>
+      <div class="header-right">
+        <div class="pill">
+          <span class="badge-dot"></span>
+          Demo only · No real payments
+        </div>
+        <div>Використовуйте для налаштування тегів і тригерів GTM</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Ліва колонка: реальний "сайт" -->
+      <div>
+        <!-- Покупка -->
+        <div class="card">
+          <div class="section-title-row">
+            <h2>1. Покупка товарів</h2>
+            <span class="badge">
+              <span class="badge-dot"></span>
+              Flow: purchase
+            </span>
+          </div>
+          <p>Симульований процес: старт покупки → карта → вибір товарів → кошик → оплата → успішна покупка.</p>
+
+          <div class="steps">
+            <div class="step-pill active" id="step-pill-start">
+              <span class="step-dot"></span> Start
+            </div>
+            <div class="step-pill" id="step-pill-payment">
+              <span class="step-dot"></span> Card details
+            </div>
+            <div class="step-pill" id="step-pill-products">
+              <span class="step-dot"></span> Products
+            </div>
+            <div class="step-pill" id="step-pill-checkout">
+              <span class="step-dot"></span> Checkout
+            </div>
+            <div class="step-pill" id="step-pill-success">
+              <span class="step-dot"></span> Success
+            </div>
+          </div>
+
+          <!-- Крок 0: кнопка старту -->
+          <div id="purchase-start-step">
+            <button
+              id="btn-start-purchase"
+              data-gtm-event="start_purchase"
+              data-gtm-label="Start Purchase"
+            >
+              Почати покупку
+            </button>
+            <p class="subtext">
+              Натисни кнопку, щоб перейти до введення даних картки. Це окремий крок, який можна трекати як
+              <strong>start_purchase</strong> або <strong>begin_checkout</strong>.
+            </p>
+          </div>
+
+          <!-- Крок 1: дані картки -->
+          <div id="payment-step" class="hidden">
+            <div class="grid-two">
+              <div>
+                <div class="field-group">
+                  <div class="field-label">Номер картки <span>*</span></div>
+                  <input type="text" id="card-number" placeholder="4111 1111 1111 1111" />
+                </div>
+                <div class="grid-two">
+                  <div class="field-group">
+                    <div class="field-label">Термін дії <span>*</span></div>
+                    <input type="text" id="card-expiry" placeholder="12/28" />
+                  </div>
+                  <div class="field-group">
+                    <div class="field-label">CVV <span>*</span></div>
+                    <input type="password" id="card-cvv" placeholder="123" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="field-group">
+                  <div class="field-label">Імʼя на картці <span>*</span></div>
+                  <input type="text" id="card-name" placeholder="John Doe" />
+                </div>
+                <p class="subtext">
+                  Дані ніде не зберігаються — це лише фронтенд для тренування.  
+                  Після натискання “Продовжити” ти переходиш до вибору товарів.
+                </p>
+              </div>
+            </div>
+            <button
+              id="btn-payment-continue"
+              data-gtm-event="payment_details_submitted"
+              data-gtm-label="Payment Details Continue"
+            >
+              Продовжити до товарів
+            </button>
+            <button class="btn-ghost btn-small" id="btn-payment-back">
+              Назад
+            </button>
+          </div>
+
+          <!-- Крок 2: вибір товарів -->
+          <div id="products-step" class="hidden">
+            <p class="subtext">
+              Обери товари. Валюта: <strong>USD</strong>. Кожен клік по "Додати в кошик" — це класичний
+              <strong>add_to_cart</strong> event.
+            </p>
+            <div class="products-grid" id="products-grid">
+              <!-- JS підставить товари -->
+            </div>
+
+            <div class="cart-summary" id="cart-summary">
+              <div class="cart-empty">
+                Кошик порожній. Додайте щось, щоб продовжити.
+              </div>
+            </div>
+
+            <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <button
+                id="btn-proceed-checkout"
+                class="secondary"
+                data-gtm-event="begin_checkout"
+                data-gtm-label="Proceed to checkout"
+              >
+                Перейти до оплати
+              </button>
+              <button class="btn-ghost btn-small" id="btn-products-back">
+                Назад до картки
+              </button>
+            </div>
+          </div>
+
+          <!-- Крок 3: "оплата" -->
+          <div id="checkout-step" class="hidden">
+            <p class="subtext">
+              Тут можна тренувати події <strong>begin_checkout</strong>, <strong>purchase</strong>, а також кастомні статуси:
+              processing / success.
+            </p>
+            <div class="cart-summary" id="checkout-cart-view"></div>
+
+            <button
+              id="btn-pay"
+              data-gtm-event="purchase"
+              data-gtm-label="Pay Now"
+            >
+              Оплатити зараз
+            </button>
+            <button class="btn-ghost btn-small" id="btn-checkout-back">
+              Назад до товарів
+            </button>
+
+            <div class="status-line" id="checkout-status-line">
+              <span class="status-dot" id="checkout-status-dot"></span>
+              <span id="checkout-status-text">Очікує дії користувача…</span>
+            </div>
+          </div>
+
+          <!-- Крок 4: успіх -->
+          <div id="success-step" class="hidden">
+            <p class="status-text-success">
+              🎉 Вітаємо! Покупка успішна, платіж оброблено.
+            </p>
+            <p class="subtext">
+              На реальному сайті тут була б "дякуємо" сторінка. Це класичне місце для <strong>purchase</strong> event у
+              GTM/GA4.  
+              Ви можете відслідковувати як показ сторінки, так і клік по кнопці.
+            </p>
+            <button
+              class="secondary"
+              id="btn-new-purchase"
+              data-gtm-event="start_new_purchase"
+              data-gtm-label="Start New Purchase"
+            >
+              Почати нову покупку
+            </button>
+          </div>
+        </div>
+
+        <!-- Реєстрація -->
+        <div class="card">
+          <div class="section-title-row">
+            <h2>2. Реєстрація користувача</h2>
+            <span class="badge">
+              <span class="badge-dot"></span>
+              Flow: registration
+            </span>
+          </div>
+          <p>Простий, але реалістичний signup-флоу: імʼя, email, пароль + згода з умовами.</p>
+
+          <form id="registration-form">
+            <div class="grid-two">
+              <div class="field-group">
+                <div class="field-label">Імʼя</div>
+                <input type="text" id="reg-name" placeholder="Імʼя" />
+              </div>
+              <div class="field-group">
+                <div class="field-label">Email <span>*</span></div>
+                <input type="email" id="reg-email" placeholder="you@example.com" />
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-label">Пароль <span>*</span></div>
+              <input type="password" id="reg-password" placeholder="••••••••" />
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="reg-terms" />
+              <label for="reg-terms">Я погоджуюсь з умовами сервісу</label>
+            </div>
+            <button
+              type="submit"
+              id="btn-register-submit"
+              data-gtm-event="registration_submit"
+              data-gtm-label="Registration Submit"
+            >
+              Створити акаунт
+            </button>
+          </form>
+          <div class="hint" id="registration-message"></div>
+        </div>
+
+        <!-- Тріал -->
+        <div class="card">
+          <div class="section-title-row">
+            <h2>3. Старт безкоштовного тріалу</h2>
+            <span class="badge">
+              <span class="badge-dot"></span>
+              Flow: free_trial
+            </span>
+          </div>
+          <p>Форма для старту тріалу: email + план. Ідеально для подій типу <strong>start_trial</strong>.</p>
+
+          <form id="trial-form">
+            <div class="grid-two">
+              <div class="field-group">
+                <div class="field-label">Email <span>*</span></div>
+                <input type="email" id="trial-email" placeholder="you@example.com" />
+              </div>
+              <div class="field-group">
+                <div class="field-label">План <span>*</span></div>
+                <select id="trial-plan">
+                  <option value="">Оберіть план</option>
+                  <option value="basic">Basic · $0 / 7 днів</option>
+                  <option value="pro">Pro · $29 / 14 днів</option>
+                  <option value="business">Business · $79 / 30 днів</option>
+                </select>
+              </div>
+            </div>
+            <button
+              type="submit"
+              id="btn-trial-submit"
+              data-gtm-event="trial_start"
+              data-gtm-label="Trial Start"
+            >
+              Почати тріал
+            </button>
+          </form>
+          <div class="hint" id="trial-message"></div>
+        </div>
+      </div>
+
+      <!-- Права колонка: лог подій + підказки для GTM -->
+      <div>
+        <div class="card">
+          <div class="log-card-title">Події для тренування GTM</div>
+          <p class="subtext">
+            Нижче логуються основні дії користувача.  
+            У коді ці події також пушаться в <code>dataLayer</code> — підключай GTM і тренуй тригери.
+          </p>
+          <div class="tag-line">
+            <span class="tag">start_purchase</span>
+            <span class="tag">payment_details_submitted</span>
+            <span class="tag">view_products</span>
+            <span class="tag">add_to_cart</span>
+            <span class="tag">begin_checkout</span>
+            <span class="tag">purchase</span>
+            <span class="tag">registration_submit</span>
+            <span class="tag">trial_start</span>
+          </div>
+
+          <div class="log" id="log"></div>
+
+          <button class="btn small secondary full" id="btn-clear-log">
+            Очистити лог
+          </button>
+        </div>
+
+        <div class="card">
+          <h2>Підказка по GTM</h2>
+          <ul class="subtext" style="padding-left: 18px; margin-top: 8px;">
+            <li>Використовуй <code>dataLayer</code> events як тригери (Custom Event).</li>
+            <li>Перевіряй у GTM Preview, що події спрацьовують.</li>
+            <li>Можеш створити GA4 events, TikTok/Meta конверсії тощо.</li>
+            <li>Слідкуй за параметрами: назви товарів, сума кошика, тип події.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/js/main.js"></script>
+</body>
+</html>
